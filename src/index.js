@@ -2,6 +2,7 @@ const express = require('express');
 const { get } = require('axios');
 const fs = require('fs');
 const moment = require('moment');
+const hb  = require('express-handlebars');
 
 const PORT = 9850;
 const app = express();
@@ -25,13 +26,14 @@ app
   // дыра в безопсности
   .get('/calc/:e', r => r.res.end(r.params.e + ' = ' + eval(r.params.e) + '\n'))
 
-  .get('/users/', async r => {
-  	const{data: {users: items}} = await get(URL);
-  	r.res.render('list', {title: 'Login list', items});
+  .get('/usershb/', async r => {
+      const{data: {users: items}} = await get(URL);
+      r.res.render('listhb', {users: items})
   })
 
   .use(r => r.res.status(404).end('sorry :(\n'))
   .use((e, r, res, n) => res.status(500).end(`Error: ${e}`))
-  .set('view engine', 'pug')
+  .engine('handlebars', hb({layoutsDir: 'listhb'}))
+  .set('view engine', 'handlebars')
   .listen(process.env.PORT || PORT, () => console.log(process.pid));
 
